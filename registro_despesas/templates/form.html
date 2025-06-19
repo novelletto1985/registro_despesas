@@ -1,11 +1,22 @@
-<form action="/enviar" method="POST">
-  <input name="descricao" placeholder="Descrição">
-  <input name="valor_total" placeholder="Valor total" type="number" step="0.01">
-  <input name="num_parcelas" placeholder="Parcelas" type="number">
-  <input name="data_compra" type="date">
-  <input name="forma_pagamento" placeholder="Pix / Crédito / Débito">
-  <input name="categoria" placeholder="Categoria">
-  <input name="subcategoria" placeholder="Subcategoria">
-  <button type="submit">Enviar</button>
-</form>
-<a href="/dashboard">Ver Dashboard</a>
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Registro de Despesas</title>
+</head>
+<body>
+    <h1>Registro de Despesas</h1>
+    <form action="/enviar" method="POST">
+        <input name="descricao" placeholder="Descrição"><br>
+        <input name="valor_total" placeholder="Valor total" type="number" step="0.01"><br>
+        <input name="num_parcelas" placeholder="Parcelas" type="number"><br>
+        <input name="data_compra" type="date"><br>
+        <input name="forma_pagamento" placeholder="Pix / Crédito / Débito"><br>
+        <input name="categoria" placeholder="Categoria"><br>
+        <input name="subcategoria" placeholder="Subcategoria"><br>
+        <button type="submit">Enviar</button>
+    </form>
+
+    <p><a href="/dashboard">Ver Dashboard</a></p>
+</body>
+</html>
