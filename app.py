@@ -43,7 +43,11 @@ def dashboard():
     ano = request.args.get('ano')
 
     conn = sqlite3.connect('banco.db')
-    df = pd.read_sql_query('SELECT * FROM parcelas', conn)
+    df = pd.read_sql_query('''
+        SELECT p.*, c.forma_pagamento, c.categoria, c.subcategoria
+        FROM parcelas p
+        JOIN compras c ON p.compra_id = c.id
+    ''', conn)
     conn.close()
 
     df['data_parcela'] = pd.to_datetime(df['data_parcela'])
