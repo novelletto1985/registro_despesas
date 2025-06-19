@@ -35,28 +35,26 @@ def enviar():
     gerar_parcelas(compra_id)
     return redirect('/')
 
-@app.route('/dashboard', methods=['GET'])
+@app.route('/dashboard')
 def dashboard():
-    ano = request.args.get('ano', default='Todos')
-    mes = request.args.get('mes', default='Todos')
+    import pandas as pd
+    import plotly.express as px
 
     conn = sqlite3.connect('banco.db')
-    df = pd.read_sql_query('SELECT * FROM parcelas INNER JOIN compras ON parcelas.compra_id = compras.id', conn)
+
+    # Selecione explicitamente apenas as colunas necessárias para evitar duplicatas
+    query = '''
+        SELECT data_parcela, valor_parcela
+        FROM parcelas
+    '''
+    df = pd.read_sql_query(query, conn)
     conn.close()
 
-    df['data_parcela'] = pd.to_datetime(df['data_parcela'])
-    df['mes'] = df['data_parcela'].dt.month
-    df['ano'] = df['data_parcela'].dt.year
+    # Gera o gráfico simples
+    fig = px.histogram(df, x='data_parcela', y='valor_parcela', histfunc='sum', title='Gastos por mês')
+    fig_html = fig.to_html(full_html=False)
 
-    anos_disponiveis = sorted(df['ano'].unique())
-
-    if ano != 'Todos':
-        df = df[df['ano'] == int(ano)]
-    if mes != 'Todos':
-        df = df[df['mes'] == int(mes)]
-
-    if df.empty:
-        return render_template('dashboard.html', grafico1=None, grafico2=None, grafico3=None, grafico4=None, anos=anos_disponiveis, ano=ano, mes=mes)
+    return render_template('dashboard.html', grafico=fig_html)
 
     fig1 = px.histogram(df, x='data_parcela', y='valor_parcela', histfunc='sum', title='Gastos por Mês')
     fig2 = px.pie(df, names='forma_pagamento', values='valor_parcela', title='Gastos por Forma de Pagamento')
