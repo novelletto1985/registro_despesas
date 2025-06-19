@@ -1,9 +1,8 @@
 from flask import Flask, render_template, request, redirect
 import sqlite3
-from datetime import datetime
-from parcelas import gerar_parcelas
 import pandas as pd
 import plotly.express as px
+from parcelas import gerar_parcelas
 
 app = Flask(__name__)
 
@@ -38,49 +37,40 @@ def enviar():
 
 @app.route('/dashboard', methods=['GET'])
 def dashboard():
-    # Filtros
-    mes = request.args.get('mes')
-    ano = request.args.get('ano')
+    ano = request.args.get('ano', default='Todos')
+    mes = request.args.get('mes', default='Todos')
 
     conn = sqlite3.connect('banco.db')
-    df = pd.read_sql_query('''
-        SELECT p.*, c.forma_pagamento, c.categoria, c.subcategoria
-        FROM parcelas p
-        JOIN compras c ON p.compra_id = c.id
-    ''', conn)
+    df = pd.read_sql_query('SELECT * FROM parcelas INNER JOIN compras ON parcelas.compra_id = compras.id', conn)
     conn.close()
 
     df['data_parcela'] = pd.to_datetime(df['data_parcela'])
     df['mes'] = df['data_parcela'].dt.month
     df['ano'] = df['data_parcela'].dt.year
 
-    # Listas únicas para dropdown
-    meses_disponiveis = sorted(df['mes'].unique())
     anos_disponiveis = sorted(df['ano'].unique())
 
-    # Filtro aplicado
-    if mes and mes != 'todos':
-        df = df[df['mes'] == int(mes)]
-    if ano and ano != 'todos':
+    if ano != 'Todos':
         df = df[df['ano'] == int(ano)]
+    if mes != 'Todos':
+        df = df[df['mes'] == int(mes)]
 
-    # Gráficos
+    if df.empty:
+        return render_template('dashboard.html', grafico1=None, grafico2=None, grafico3=None, grafico4=None, anos=anos_disponiveis, ano=ano, mes=mes)
+
     fig1 = px.histogram(df, x='data_parcela', y='valor_parcela', histfunc='sum', title='Gastos por Mês')
     fig2 = px.pie(df, names='forma_pagamento', values='valor_parcela', title='Gastos por Forma de Pagamento')
     fig3 = px.pie(df, names='categoria', values='valor_parcela', title='Gastos por Categoria')
     fig4 = px.pie(df, names='subcategoria', values='valor_parcela', title='Gastos por Subcategoria')
 
-    return render_template(
-        'dashboard.html',
-        grafico1=fig1.to_html(full_html=False),
-        grafico2=fig2.to_html(full_html=False),
-        grafico3=fig3.to_html(full_html=False),
-        grafico4=fig4.to_html(full_html=False),
-        meses=meses_disponiveis,
-        anos=anos_disponiveis,
-        mes_selecionado=mes or 'todos',
-        ano_selecionado=ano or 'todos'
-    )
+    return render_template('dashboard.html',
+                           grafico1=fig1.to_html(full_html=False),
+                           grafico2=fig2.to_html(full_html=False),
+                           grafico3=fig3.to_html(full_html=False),
+                           grafico4=fig4.to_html(full_html=False),
+                           anos=anos_disponiveis,
+                           ano=ano,
+                           mes=mes)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=10000)
