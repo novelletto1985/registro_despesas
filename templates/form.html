@@ -1,11 +1,40 @@
-<form action="/enviar" method="POST">
-  <input name="descricao" placeholder="Descrição">
-  <input name="valor_total" placeholder="Valor total" type="number" step="0.01">
-  <input name="num_parcelas" placeholder="Parcelas" type="number">
-  <input name="data_compra" type="date">
-  <input name="forma_pagamento" placeholder="Pix / Crédito / Débito">
-  <input name="categoria" placeholder="Categoria">
-  <input name="subcategoria" placeholder="Subcategoria">
-  <button type="submit">Enviar</button>
-</form>
-<a href="/dashboard">Ver Dashboard</a>
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Registro de Despesas</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+  <div class="container mt-5">
+    <h2 class="mb-4 text-center">Registro de Despesas</h2>
+    <form action="/enviar" method="POST" class="row g-3 shadow p-4 bg-white rounded">
+      <div class="col-md-6">
+        <input name="descricao" class="form-control" placeholder="Descrição" required>
+      </div>
+      <div class="col-md-3">
+        <input name="valor_total" class="form-control" placeholder="Valor total" type="number" step="0.01" required>
+      </div>
+      <div class="col-md-3">
+        <input name="num_parcelas" class="form-control" placeholder="Parcelas" type="number" required>
+      </div>
+      <div class="col-md-4">
+        <input name="data_compra" class="form-control" type="date" required>
+      </div>
+      <div class="col-md-4">
+        <input name="forma_pagamento" class="form-control" placeholder="Forma de pagamento (Pix, Crédito...)" required>
+      </div>
+      <div class="col-md-4">
+        <input name="categoria" class="form-control" placeholder="Categoria" required>
+      </div>
+      <div class="col-md-6">
+        <input name="subcategoria" class="form-control" placeholder="Subcategoria" required>
+      </div>
+      <div class="col-12 text-end">
+        <button type="submit" class="btn btn-primary">Registrar</button>
+        <a href="/dashboard" class="btn btn-outline-secondary ms-2">Ver Dashboard</a>
+      </div>
+    </form>
+  </div>
+</body>
+</html>

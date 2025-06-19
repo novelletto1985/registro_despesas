@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect
 import sqlite3
 from datetime import datetime
 from parcelas import gerar_parcelas
+import pandas as pd
 
 app = Flask(__name__)
 
@@ -36,17 +37,31 @@ def enviar():
 
 @app.route('/dashboard')
 def dashboard():
-    import pandas as pd
-    import plotly.express as px
-
-    conn = sqlite3.connect('banco.db')
-    df = pd.read_sql_query('SELECT * FROM parcelas', conn)
+    conn = sqlite3.connect("banco.db")
+    df = pd.read_sql_query("SELECT * FROM compras", conn)
     conn.close()
 
-    fig = px.histogram(df, x='data_parcela', y='valor_parcela', histfunc='sum', title='Gastos por mês')
-    fig_html = fig.to_html(full_html=False)
+    total = df["valor_total"].sum()
 
-    return render_template('dashboard.html', grafico=fig_html)
+    # Gráfico de pizza: soma de valores por categoria
+    categorias = df["categoria"].fillna("Outros").unique().tolist()
+    valores_por_categoria = df.groupby("categoria")["valor_total"].sum().tolist()
+
+    # Gráfico de linha: soma por data de compra
+    df["data_compra"] = pd.to_datetime(df["data_compra"])
+    df_linha = df.groupby(df["data_compra"].dt.date)["valor_total"].sum().sort_index()
+    datas = df_linha.index.astype(str).tolist()
+    valores_por_data = df_linha.tolist()
+
+    return render_template(
+        "dashboard.html",
+        despesas=df.to_dict(orient="records"),
+        total=round(total, 2),
+        categorias=categorias,
+        valores_por_categoria=valores_por_categoria,
+        datas=datas,
+        valores_por_data=valores_por_data
+    )
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=10000)
